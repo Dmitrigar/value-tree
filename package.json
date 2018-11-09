@@ -1,0 +1,20 @@
+{
+  "name": "value-tree",
+  "version": "0.1.0",
+  "description": "Editable and parseable data tree sample.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha \"./**/*.spec.js\" --watch"
+  },
+  "keywords": [
+    "Tree",
+    "Parse",
+    "Path"
+  ],
+  "author": "Dmitriy Garbuz",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0"
+  }
+}
