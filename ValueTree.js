@@ -4,8 +4,7 @@
     render: function(node) {
       var wrapper = document.createElement("div");
       wrapper.className = "value-tree-node";
-
-      var name = wrapper;
+      return wrapper;
     },
 
     // should return tree created by merging every {path,value} pair given
