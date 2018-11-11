@@ -1,9 +1,33 @@
 (function() {
   var ValueTree = {
     // recursively render tree nodes
-    render: function(node) {
-      var wrapper = document.createElement("div");
+    render: function(treeNode, doc) {
+      if (!treeNode || typeof treeNode !== "object") return undefined;
+
+      var wrapper = doc.createElement("div");
       wrapper.className = "value-tree-node";
+
+      var name = doc.createElement("div");
+      name.className = "value-tree-node__name";
+      name.innerHTML = treeNode.name;
+      wrapper.appendChild(name);
+
+      if (treeNode.hasOwnProperty("value")) {
+        var value = doc.createElement("div");
+        value.className = "value-tree-node__value";
+        value.value = String(treeNode.value);
+        wrapper.appendChild(value);
+      }
+
+      if (Array.isArray(treeNode.children)) {
+        var children = doc.createElement("div");
+        children.className = "value-tree-node__children";
+        wrapper.appendChild(children);
+        for (var i = 0, n = treeNode.children.length; i < n; i++) {
+          children.appendChild(this.render(treeNode.children[i], doc));
+        }
+      }
+
       return wrapper;
     },
 

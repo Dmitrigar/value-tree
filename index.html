@@ -9,10 +9,7 @@
 
 <body>
   <h1>Value Tree</h1>
-  <div>
-
-  </div>
-
+  <div id="container"></div>
   <script>
     var tree = ValueTree.parse([{
         path: '0:alpha',
@@ -23,6 +20,8 @@
         value: 'two'
       }
     ]);
+    var container = document.getElementById("container");
+    container.appendChild(ValueTree.render(tree, document))
   </script>
 
 </body>
