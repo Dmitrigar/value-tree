@@ -28,9 +28,13 @@ module.exports = {
 
       // should maintain multiple children of the same node
       var existingChild = node.children[step.id];
+      if (existingChild) {
+        // should return undefined when given pair has path conflict
+        if (existingChild.name !== step.name) return undefined;
 
-      // should return undefined when paths has name conflicts
-      if (existingChild && existingChild.name !== step.name) return undefined;
+        // should return undefined when given pair has value conflict
+        if (i === last && existingChild.value !== step.value) return undefined;
+      }
 
       var child = existingChild || { name: step.name };
       node.children[step.id] = child;

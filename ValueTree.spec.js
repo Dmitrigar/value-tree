@@ -35,6 +35,29 @@ describe("ValueTree", function() {
           { name: "delta", value: "two" }
         ]
       });
+
+      expect(
+        ValueTree.parse([
+          { path: "2:cities/0:Moscow", value: "Russia" },
+          { path: "2:cities/1:London", value: "Great Britain" },
+          { path: "2:cities/3:Paris", value: "France" }
+        ])
+      ).to.deep.equal({
+        name: "root",
+        children: [
+          ,
+          ,
+          {
+            name: "cities",
+            children: [
+              { name: "Moscow", value: "Russia" },
+              { name: "London", value: "Great Britain" },
+              ,
+              { name: "Paris", value: "France" }
+            ]
+          }
+        ]
+      });
     });
 
     it("should return undefined when no array argument presented", function() {
@@ -89,9 +112,7 @@ describe("ValueTree", function() {
             children: [
               {
                 name: "alpha",
-                children: [
-                  { name: "beta", value: "one" }
-                ]
+                children: [{ name: "beta", value: "one" }]
               }
             ]
           },
@@ -111,11 +132,20 @@ describe("ValueTree", function() {
       });
     });
 
-    it("should return undefined when paths has name conflicts", function() {
+    it("should return undefined when given pair has path conflict", function() {
       expect(
         ValueTree.mergePair(
           { name: "root", children: [{ path: "0:alpha", value: "one" }] },
-          { path: "0:CONFLICTING_NAME", value: "one" }
+          { path: "0:CONFLICT", value: "one" }
+        )
+      ).to.be.undefined;
+    });
+
+    it("should return undefined when given pair has value conflict", function() {
+      expect(
+        ValueTree.mergePair(
+          { name: "root", children: [{ name: "alpha", value: "one" }] },
+          { path: "0:alpha", value: "CONFLICT" }
         )
       ).to.be.undefined;
     });
