@@ -27,7 +27,7 @@ module.exports = {
       if (!node.children) node.children = [];
 
       // should maintain multiple children of the same node
-      var existingChild = node.children[step.id];
+      var existingChild = node.children[step.index];
       if (existingChild) {
         // should return undefined when given pair has path conflict
         if (existingChild.name !== step.name) return undefined;
@@ -37,7 +37,7 @@ module.exports = {
       }
 
       var child = existingChild || { name: step.name };
-      node.children[step.id] = child;
+      node.children[step.index] = child;
       node = child;
     }
 
@@ -57,7 +57,7 @@ module.exports = {
     return { steps: steps, value: pair.value };
   },
 
-  // should return array of {id,name} steps when 'id:name/...' given
+  // should return array of {index,name} steps when 'index:name/...' given
   parsePath: function(path) {
     // should return undefined when argument is not a string
     if (typeof path !== "string") return undefined;
@@ -73,7 +73,7 @@ module.exports = {
     return steps;
   },
 
-  // should return {id,name} when 'id:name' segment given
+  // should return {index,name} when 'index:name' segment given
   parsePathSegment: function(segment) {
     // should return undefined when argument is not a string
     if (typeof segment !== "string") return undefined;
@@ -85,11 +85,14 @@ module.exports = {
     // should return undefined when given argument contains slash
     if (segment.indexOf("/") >= 0) return undefined;
 
-    // should return undefined when given id is not a number
-    var id = Number(segment.slice(0, colonIndex));
-    if (isNaN(id)) return undefined;
+    // should return undefined when given index is not a number
+    var index = Number(segment.slice(0, colonIndex));
+    if (isNaN(index)) return undefined;
 
     // should allow colons within the name
-    return { id: id, name: segment.slice(colonIndex + 1, segment.length) };
+    return {
+      index: index,
+      name: segment.slice(colonIndex + 1, segment.length)
+    };
   }
 };

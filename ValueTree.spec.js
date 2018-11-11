@@ -179,7 +179,7 @@ describe("ValueTree", function() {
     it("should return {steps,value} stepway when {path,value} pair given", function() {
       expect(
         ValueTree.parsePair({ path: "0:alpha", value: "one" })
-      ).to.deep.equal({ steps: [{ id: 0, name: "alpha" }], value: "one" });
+      ).to.deep.equal({ steps: [{ index: 0, name: "alpha" }], value: "one" });
     });
 
     it("should return undefined when no object argument presented", function() {
@@ -199,14 +199,14 @@ describe("ValueTree", function() {
   });
 
   describe("#parsePath(path)", function() {
-    it("should return array of {id,name} steps when 'id:name/...' path given", function() {
+    it("should return array of {index,name} steps when 'index:name/...' path given", function() {
       expect(ValueTree.parsePath("1:alpha")).to.deep.equal([
-        { id: 1, name: "alpha" }
+        { index: 1, name: "alpha" }
       ]);
 
       expect(ValueTree.parsePath("2:beta/3:gamma")).to.deep.equal([
-        { id: 2, name: "beta" },
-        { id: 3, name: "gamma" }
+        { index: 2, name: "beta" },
+        { index: 3, name: "gamma" }
       ]);
     });
 
@@ -228,14 +228,14 @@ describe("ValueTree", function() {
   });
 
   describe("#parsePathSegment(segment)", function() {
-    it("should return {id,name} when 'id:name' segment given", function() {
+    it("should return {index,name} when 'index:name' segment given", function() {
       expect(ValueTree.parsePathSegment("0:alpha")).to.deep.equal({
-        id: 0,
+        index: 0,
         name: "alpha"
       });
 
       expect(ValueTree.parsePathSegment("1:beta")).to.deep.equal({
-        id: 1,
+        index: 1,
         name: "beta"
       });
     });
@@ -258,13 +258,13 @@ describe("ValueTree", function() {
       expect(ValueTree.parsePathSegment("1:beta/2:gamma")).to.be.undefined;
     });
 
-    it("should return undefined when given id is not a number", function() {
+    it("should return undefined when given index is not a number", function() {
       expect(ValueTree.parsePathSegment("NaN:alpha")).to.be.undefined;
     });
 
     it("should allow colons within the name", function() {
       expect(ValueTree.parsePathSegment("15:colons:are:ok")).to.deep.equal({
-        id: 15,
+        index: 15,
         name: "colons:are:ok"
       });
     });
