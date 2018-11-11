@@ -81,6 +81,45 @@ describe("ValueTree", function() {
       });
     });
 
+    it("should maintain multiple children of the same node", function() {
+      expect(
+        ValueTree.mergePair(
+          {
+            name: "root",
+            children: [
+              {
+                name: "alpha",
+                children: [
+                  { name: "beta", value: "one" }
+                ]
+              }
+            ]
+          },
+          { path: "0:alpha/1:gamma", value: "two" }
+        )
+      ).to.deep.equal({
+        name: "root",
+        children: [
+          {
+            name: "alpha",
+            children: [
+              { name: "beta", value: "one" },
+              { name: "gamma", value: "two" }
+            ]
+          }
+        ]
+      });
+    });
+
+    it("should return undefined when paths has name conflicts", function() {
+      expect(
+        ValueTree.mergePair(
+          { name: "root", children: [{ path: "0:alpha", value: "one" }] },
+          { path: "0:CONFLICTING_NAME", value: "one" }
+        )
+      ).to.be.undefined;
+    });
+
     it("should return undefined when falsy root given", function() {
       expect(ValueTree.mergePair(undefined, { path: "0:alpha", value: "one" }))
         .to.be.undefined;

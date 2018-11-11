@@ -24,8 +24,15 @@ module.exports = {
     var node = root;
     for (var i = 0, last = stepway.steps.length - 1; i <= last; i++) {
       var step = stepway.steps[i];
-      var child = { name: step.name };
       if (!node.children) node.children = [];
+
+      // should maintain multiple children of the same node
+      var existingChild = node.children[step.id];
+
+      // should return undefined when paths has name conflicts
+      if (existingChild && existingChild.name !== step.name) return undefined;
+
+      var child = existingChild || { name: step.name };
       node.children[step.id] = child;
       node = child;
     }
