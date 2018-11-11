@@ -2,6 +2,10 @@
 
 This is example of parsing and rendering tree data.
 
+## Browser support
+
+This example is meant to support as many browsers as possible.
+
 ## Running example
 
   - Clone repository to your local computer.
