@@ -19,10 +19,6 @@ app.get("/", (req, res) => {
   sendFileContent(res, "index.html");
 });
 
-app.get("/data.json", (req, res) => {
-  sendFileContent(res, "data.json");
-});
-
 // Value Tree script
 app.get("/value-tree.js", (req, res) => {
   sendFileContent(res, "ValueTree.js");
