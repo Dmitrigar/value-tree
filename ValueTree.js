@@ -10,16 +10,16 @@
       wrapper.className = "value-tree-node";
 
       // should create name for every node
-      var name = doc.createElement("div");
+      var name = doc.createElement("span");
       name.className = "value-tree-node__name";
       name.innerHTML = treeNode.name;
       wrapper.appendChild(name);
 
       // should create value when presented
       if (treeNode.hasOwnProperty("value")) {
-        var value = doc.createElement("div");
+        var value = doc.createElement("span");
         value.className = "value-tree-node__value";
-        value.value = String(treeNode.value);
+        value.innerHTML = String(treeNode.value);
         wrapper.appendChild(value);
       }
 
