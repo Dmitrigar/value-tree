@@ -1,31 +1,38 @@
 var expect = require("chai").expect;
 var ValueTree = require("./ValueTree");
 
-describe("Tree", function() {
-  describe("#parseTree()", function(arg) {
-    it("Should return value-tree structure when empty array given", function() {
+describe("ValueTree", function() {
+  describe("#parse(pairs)", function() {
+    it("should return tree created by merging every {path,value} pair given", function() {
       expect(ValueTree.parse([])).to.deep.equal({
         name: "root",
         children: []
       });
-    });
 
-    it("Should return value-tree structure when single-item array given", function() {
       expect(
-        ValueTree.parse([{ path: "0:alpha", value: "one" }])
-      ).to.deep.equal({
-        name: "root",
-        children: [{ name: "alpha", value: "one" }]
-      });
-      expect(
-        ValueTree.parse([{ path: "0:alpha/2:beta", value: "two" }])
+        ValueTree.parse([
+          { path: "0:alpha", value: "one" },
+          { path: "1:beta/0:gamma", value: "two" }
+        ])
       ).to.deep.equal({
         name: "root",
         children: [
-          {
-            name: "alpha",
-            children: [,,{ name: "beta", value: "two" }]
-          }
+          { name: "alpha", value: "one" },
+          { name: "beta", children: [{ name: "gamma", value: "two" }] }
+        ]
+      });
+
+      expect(
+        ValueTree.parse([
+          { path: "0:alpha/0:beta", value: "one" },
+          { path: "2:delta", value: "two" }
+        ])
+      ).to.deep.equal({
+        name: "root",
+        children: [
+          { name: "alpha", children: [{ name: "beta", value: "one" }] },
+          ,
+          { name: "delta", value: "two" }
         ]
       });
     });
@@ -39,51 +46,102 @@ describe("Tree", function() {
       expect(ValueTree.parse({})).to.be.undefined;
       expect(ValueTree.parse(function() {})).to.be.undefined;
     });
+
+    it("should return undefined when any pair can not be merged", function() {
+      expect(ValueTree.parse([{ path: "???", value: "one" }])).to.be.undefined;
+
+      expect(
+        ValueTree.parse([
+          { path: "0:alpha", value: "one" },
+          { path: "???", value: "one" }
+        ])
+      ).to.be.undefined;
+    });
   });
 
-  describe("#parsePathValue()", function() {
-    it("should return {segments, value} object when {path,value} object given", function() {
+  describe("#mergePair(root, pair)", function() {
+    it("should return the result of merging root with the {path,value} pair", function() {
+      var tree = { name: "root", children: [] };
+
       expect(
-        ValueTree.parsePathValue({ path: "0:alpha", value: "one" })
+        ValueTree.mergePair(tree, { path: "0:alpha", value: "one" })
       ).to.deep.equal({
-        segments: [{ id: 0, name: "alpha" }],
-        value: "one"
+        name: "root",
+        children: [{ name: "alpha", value: "one" }]
       });
+
       expect(
-        ValueTree.parsePathValue({ path: "1:beta/0:gamma", value: "two" })
+        ValueTree.mergePair(tree, { path: "1:beta/2:gamma", value: "two" })
       ).to.deep.equal({
-        segments: [{ id: 1, name: "beta" }, { id: 0, name: "gamma" }],
-        value: "two"
+        name: "root",
+        children: [
+          { name: "alpha", value: "one" },
+          { name: "beta", children: [, , { name: "gamma", value: "two" }] }
+        ]
       });
+    });
+
+    it("should return undefined when falsy root given", function() {
+      expect(ValueTree.mergePair(undefined, { path: "0:alpha", value: "one" }))
+        .to.be.undefined;
+    });
+
+    it("should return undefined when given pair can not be parsed", function() {
+      expect(
+        ValueTree.mergePair(
+          {
+            name: "root",
+            children: []
+          },
+          undefined
+        )
+      ).to.be.undefined;
+
+      expect(
+        ValueTree.mergePair(
+          { name: "root", children: [] },
+          { path: "?", value: "one" }
+        )
+      ).to.be.undefined;
+    });
+  });
+
+  describe("#parsePair(pair)", function() {
+    it("should return {steps,value} stepway when {path,value} pair given", function() {
+      expect(
+        ValueTree.parsePair({ path: "0:alpha", value: "one" })
+      ).to.deep.equal({ steps: [{ id: 0, name: "alpha" }], value: "one" });
     });
 
     it("should return undefined when no object argument presented", function() {
-      expect(ValueTree.parsePathValue()).to.be.undefined;
-      expect(ValueTree.parsePathValue(null)).to.be.undefined;
-      expect(ValueTree.parsePathValue(42)).to.be.undefined;
-      expect(ValueTree.parsePathValue(true)).to.be.undefined;
-      expect(ValueTree.parsePathValue([])).to.be.undefined;
-      expect(ValueTree.parsePathValue("alpha")).to.be.undefined;
-      expect(ValueTree.parsePathValue(function() {})).to.be.undefined;
+      expect(ValueTree.parsePair()).to.be.undefined;
+      expect(ValueTree.parsePair(null)).to.be.undefined;
+      expect(ValueTree.parsePair(42)).to.be.undefined;
+      expect(ValueTree.parsePair(true)).to.be.undefined;
+      expect(ValueTree.parsePair("alpha")).to.be.undefined;
+      expect(ValueTree.parsePair([])).to.be.undefined;
+      expect(ValueTree.parsePair(function() {})).to.be.undefined;
     });
 
-    it("should return undefined when path is failed to parse", function() {
-      expect(ValueTree.parsePathValue({ path: "alpha" })).to.be.undefined;
+    it("should return undefined when path can not be defined", function() {
+      expect(ValueTree.parsePair({ value: "one" })).to.be.undefined;
+      expect(ValueTree.parsePair({ path: "?", value: "two" })).to.be.undefined;
     });
   });
 
-  describe("#parsePath()", function() {
-    it("should return array of {id,name} when 'id:name/id:name/...' given", function() {
+  describe("#parsePath(path)", function() {
+    it("should return array of {id,name} steps when 'id:name/...' path given", function() {
       expect(ValueTree.parsePath("1:alpha")).to.deep.equal([
         { id: 1, name: "alpha" }
       ]);
+
       expect(ValueTree.parsePath("2:beta/3:gamma")).to.deep.equal([
         { id: 2, name: "beta" },
         { id: 3, name: "gamma" }
       ]);
     });
 
-    it("should return undefined when argument is not a string.", function() {
+    it("should return undefined when argument is not a string", function() {
       expect(ValueTree.parsePath()).to.be.undefined;
       expect(ValueTree.parsePath(null)).to.be.undefined;
       expect(ValueTree.parsePath(42)).to.be.undefined;
@@ -93,29 +151,23 @@ describe("Tree", function() {
       expect(ValueTree.parsePath(function() {})).to.be.undefined;
     });
 
-    it("should return undefined when any segment considered undefined", function() {
+    it("should return undefined when any segment can not be defined", function() {
       expect(ValueTree.parsePath("?????/2:beta")).to.be.undefined;
       expect(ValueTree.parsePath("1:alpha/?????")).to.be.undefined;
       expect(ValueTree.parsePath("1:alpha/?????/3:gamma")).to.be.undefined;
     });
   });
 
-  describe("#parsePathSegment()", function() {
-    it("should return {id,name} when 'id:name' given", function() {
+  describe("#parsePathSegment(segment)", function() {
+    it("should return {id,name} when 'id:name' segment given", function() {
       expect(ValueTree.parsePathSegment("0:alpha")).to.deep.equal({
         id: 0,
         name: "alpha"
       });
+
       expect(ValueTree.parsePathSegment("1:beta")).to.deep.equal({
         id: 1,
         name: "beta"
-      });
-    });
-
-    it("should allow colons within the name", function() {
-      expect(ValueTree.parsePathSegment("15:colons:are:ok")).to.deep.equal({
-        id: 15,
-        name: "colons:are:ok"
       });
     });
 
@@ -139,6 +191,13 @@ describe("Tree", function() {
 
     it("should return undefined when given id is not a number", function() {
       expect(ValueTree.parsePathSegment("NaN:alpha")).to.be.undefined;
+    });
+
+    it("should allow colons within the name", function() {
+      expect(ValueTree.parsePathSegment("15:colons:are:ok")).to.deep.equal({
+        id: 15,
+        name: "colons:are:ok"
+      });
     });
   });
 });

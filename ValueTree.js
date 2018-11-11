@@ -1,96 +1,84 @@
 module.exports = {
-  // Parse array of {path,value} into value-tree structure.
-  parse: function(arg) {
-    // Should return undefined when no array argument presented.
-    if (!Array.isArray(arg)) return undefined;
+  // should return tree created by merging every {path,value} pair given
+  parse: function(pairs) {
+    // should return undefined when no array argument presented
+    if (!Array.isArray(pairs)) return undefined;
 
-    // Create tree root.
     var root = { name: "root", children: [] };
-    if (!arg.length) return root;
-
-    // Parse current path-value.
-    var current = this.parsePathValue(arg[0]);
-
-    // Append current segments as nodes to tree.
-    var node = root;
-    var segmentsEnd = current.segments.length - 1;
-    for (var segmentIndex = 0; segmentIndex <= segmentsEnd; segmentIndex++) {
-      var segment = current.segments[segmentIndex];
-
-      // Append child node to node.
-      var childNode = { name: segment.name };
-      node.children[segment.id] = childNode;
-
-      if (segmentIndex === segmentsEnd) {
-        // If this is last segment then extend child node with current value.
-        childNode.value = current.value;
-      } else {
-        // Otherwise extend child node with children.
-        childNode.children = [];
-      }
-
-      node = childNode;
+    for (var i = 0; i < pairs.length; i++) {
+      // should return undefined when any pair can not be merged
+      if (!this.mergePair(root, pairs[i])) return undefined;
     }
-
-    // Return value-tree structure from root.
     return root;
   },
 
-  // Parse {path,value} into {segments,value}, where segments is array of {id,name}.
-  parsePathValue: function(arg) {
-    // Should return undefined when no object argument presented.
-    if (!arg) return undefined;
+  // should return the result of merging root with the {path,value} pair
+  mergePair: function(root, pair) {
+    // should return undefined when falsy root given
+    if (!root) return undefined;
 
-    // Should return undefined when path is failed to parse.
-    var segments = this.parsePath(arg.path);
-    if (!segments) return undefined;
+    // should return undefined when given pair can not be parsed
+    var stepway = this.parsePair(pair);
+    if (!stepway) return undefined;
 
-    // Return {segments,value} object.
-    return {
-      segments: segments,
-      value: arg.value
-    };
-  },
-
-  // Parse path 'id:name/id:name/...' into array of {id,name}.
-  parsePath: function(arg) {
-    // Should return undefined when argument is not a string.
-    if (typeof arg !== "string") return undefined;
-
-    // Parse path segments to array of segment objects
-    var segments = arg.split("/");
-    var segmentsEnd = segments.length - 1;
-    var objects = Array(segments.length);
-    for (var segmentIndex = 0; segmentIndex <= segmentsEnd; segmentIndex++) {
-      var obj = this.parsePathSegment(segments[segmentIndex]);
-
-      // Should return undefined when any segment considered undefined.
-      if (!obj) return undefined;
-
-      objects[segmentIndex] = obj;
+    var node = root;
+    for (var i = 0, last = stepway.steps.length - 1; i <= last; i++) {
+      var step = stepway.steps[i];
+      var child = { name: step.name };
+      if (!node.children) node.children = [];
+      node.children[step.id] = child;
+      node = child;
     }
 
-    // Return array of segment objects.
-    return objects;
+    node.value = pair.value;
+    return root;
   },
 
-  // Parse 'id:name' into {id,name}.
-  parsePathSegment: function(arg) {
-    // Should return undefined when argument is not a string.
-    if (typeof arg !== "string") return undefined;
+  // should return {steps,value} stepway when {path,value} pair given
+  parsePair: function(pair) {
+    //should return undefined when no object argument presented
+    if (!pair || typeof pair !== "object") return undefined;
 
-    // Should return undefined when argument does not contain colon.
-    var colonIndex = arg.indexOf(":");
+    // should return undefined when path can not be defined
+    var steps = this.parsePath(pair.path);
+    if (!steps) return undefined;
+
+    return { steps: steps, value: pair.value };
+  },
+
+  // should return array of {id,name} steps when 'id:name/...' given
+  parsePath: function(path) {
+    // should return undefined when argument is not a string
+    if (typeof path !== "string") return undefined;
+
+    var segments = path.split("/");
+    var steps = Array(segments.length);
+    for (var i = 0; i < segments.length; i++) {
+      steps[i] = this.parsePathSegment(segments[i]);
+
+      // should return undefined when any segment can not be defined
+      if (!steps[i]) return undefined;
+    }
+    return steps;
+  },
+
+  // should return {id,name} when 'id:name' segment given
+  parsePathSegment: function(segment) {
+    // should return undefined when argument is not a string
+    if (typeof segment !== "string") return undefined;
+
+    // should return undefined when given argument does not contain colon
+    var colonIndex = segment.indexOf(":");
     if (colonIndex < 0) return undefined;
 
-    // Should return undefined when argument contains slash.
-    if (arg.indexOf("/") >= 0) return undefined;
+    // should return undefined when given argument contains slash
+    if (segment.indexOf("/") >= 0) return undefined;
 
-    // Should return undefined when given id is not a number.
-    var id = Number(arg.slice(0, colonIndex));
+    // should return undefined when given id is not a number
+    var id = Number(segment.slice(0, colonIndex));
     if (isNaN(id)) return undefined;
 
-    // Return object with given id and name.
-    return { id: id, name: arg.slice(colonIndex + 1, arg.length) };
+    // should allow colons within the name
+    return { id: id, name: segment.slice(colonIndex + 1, segment.length) };
   }
 };
