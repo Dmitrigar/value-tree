@@ -1,17 +1,21 @@
 (function() {
   var ValueTree = {
-    // recursively render tree nodes
+    // should recursively render tree nodes
     render: function(treeNode, doc) {
+      // should return undefined when no treeNode object given
       if (!treeNode || typeof treeNode !== "object") return undefined;
 
+      // should create wrapper for every node
       var wrapper = doc.createElement("div");
       wrapper.className = "value-tree-node";
 
+      // should create name for every node
       var name = doc.createElement("div");
       name.className = "value-tree-node__name";
       name.innerHTML = treeNode.name;
       wrapper.appendChild(name);
 
+      // should create value when presented
       if (treeNode.hasOwnProperty("value")) {
         var value = doc.createElement("div");
         value.className = "value-tree-node__value";
@@ -19,12 +23,16 @@
         wrapper.appendChild(value);
       }
 
+      // should recursively render children when presented
       if (Array.isArray(treeNode.children)) {
         var children = doc.createElement("div");
         children.className = "value-tree-node__children";
         wrapper.appendChild(children);
         for (var i = 0, n = treeNode.children.length; i < n; i++) {
-          children.appendChild(this.render(treeNode.children[i], doc));
+          var child = this.render(treeNode.children[i], doc);
+
+          // should skip undefined children
+          if (child) children.appendChild(child);
         }
       }
 

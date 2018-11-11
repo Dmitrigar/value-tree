@@ -16,14 +16,21 @@
         value: 'one'
       },
       {
-        path: '1:beta/0:gamma',
+        path: '1:beta/2:gamma',
         value: 'two'
       }
     ]);
     var container = document.getElementById("container");
     container.appendChild(ValueTree.render(tree, document))
   </script>
-
+  <style>
+    #container {
+      margin: 10px;
+    }
+    .value-tree-node__children {
+      padding-left: 25px;
+    }
+  </style>
 </body>
 
 </html>
