@@ -87,20 +87,31 @@
         editable.hidden = true;
         nodeItem.appendChild(editable);
 
-        // should handle ediging on click
-        var edit = function(e) {
-          editable.value = String(node.value);
-          readonly.hidden = true;
-          editable.hidden = false;
-        };
-        readonly.onclick = edit;
-
-        // should handle saving on blur or ENTER hit
+        // should handle saving
         var save = function(e) {
+          editable.hidden = true;
           readonly.innerHTML = node.value = editable.value;
           readonly.hidden = false;
-          editable.hidden = true;
         };
+
+        // should handle saving by ENTER
+        var saveByEnter = function(e) {
+          if (e.key === "Enter") {
+            save();
+            window.removeEventListener("keypress", saveByEnter);
+          }
+        };
+
+        // should handle ediging
+        var edit = function() {
+          window.addEventListener("keypress", saveByEnter);
+          readonly.hidden = true;
+          editable.value = String(node.value);
+          editable.hidden = false;
+          editable.focus();
+        };
+
+        readonly.onclick = edit;
         editable.onblur = save;
       }
 
