@@ -44,11 +44,6 @@
       // name should hold the node item
       name.nodeItem = nodeItem;
 
-      // should show node path on name click
-      name.onclick = function(e) {
-        alert(self.getNodeItemPath(nodeItem));
-      };
-
       // should render value when presented
       if (node.hasOwnProperty("value")) {
         // should render readonly value
@@ -91,6 +86,16 @@
         readonly.onclick = edit;
         editable.onblur = save;
       }
+
+      // should show node path on name click
+      var nodePath = doc.createElement("span");
+      nodePath.className = "value-tree-node__path";
+      nodePath.hidden = true;
+      nodeItem.appendChild(nodePath);
+      name.onclick = function(e) {
+        nodePath.innerHTML = self.getNodeItemPath(nodeItem);
+        nodePath.hidden = !nodePath.hidden;
+      };
 
       //should render children when presented
       if (Array.isArray(node.children)) {
