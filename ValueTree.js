@@ -59,6 +59,7 @@
 
         // should render hidden editable value
         var editable = doc.createElement("input");
+        editable.className = "value-tree-node__value";
         editable.type = "text";
         editable.hidden = true;
         nodeItem.appendChild(editable);
