@@ -9,33 +9,39 @@
   var ValueTree = {
     // should render tree to container
     render: function(tree, container) {
-      // should highlight node path on click
-      container.onclick = function(e) {
-        // should handle only when clicked inside node item
-        var regularClass = "value-tree-node__item";
-        var highlightClass = "value-tree-node__item--highlight";
+      // should handle container click events
+      var clickNodeItem = this.clickNodeItem;
+      container.addEventListener("click", function(e) {
         var el = e.target;
-        while (
-          el &&
-          el.className !== regularClass &&
-          el.className !== highlightClass
-        ) {
+        while (el !== container) {
+          if (el.className === "value-tree-node__item") {
+            clickNodeItem(el);
+          }
+
           el = el.parentElement;
         }
-        if (!el) return;
-
-        // should unselect all node items
-        var highlights = container.getElementsByClassName(highlightClass);
-        while (highlights.length) highlights[0].className = regularClass;
-
-        // should select every parent node item
-        do {
-          el.className = highlightClass;
-        } while ((el = el.parentNodeItem));
-      };
+      });
 
       // should append rendered nodes to container
       container.appendChild(this.renderNode(tree, container.ownerDocument));
+    },
+
+    // should handle click by node item
+    clickNodeItem(nodeItem) {
+      // should do nothing if no nodeItem with node data given
+      if (!nodeItem || !nodeItem.node) return;
+
+      // should collect path by moving up node by node (excluding root)
+      var path = "";
+      while (nodeItem.hasOwnProperty("childIndex")) {
+        var index = String(nodeItem.childIndex);
+        var name = String(nodeItem.node.name);
+        path = index + ":" + name + (path.length ? "/" : "") + path;
+        nodeItem = nodeItem.parentNodeItem;
+      }
+
+      // should alert path when have some
+      if (path.length) alert(path);
     },
 
     // should recursively render tree nodes
@@ -52,7 +58,10 @@
       item.className = "value-tree-node__item";
       wrapper.appendChild(item);
 
-      // should hold tree node item
+      // item should hold node data
+      item.node = node;
+
+      // wrapper should hold node item
       wrapper.nodeItem = item;
 
       // should render name
@@ -81,10 +90,11 @@
 
           // should skip when child is undefined
           if (child) {
-            // should hold parent item
-            child.nodeItem.parentNodeItem = item;
-
             children.appendChild(child);
+
+            // child node item should hold child index and parent node item
+            child.nodeItem.childIndex = i;
+            child.nodeItem.parentNodeItem = item;
           }
         }
       }
