@@ -9,43 +9,14 @@
   var ValueTree = {
     // should render tree to container
     render: function(tree, container) {
-      // should handle container click events
-      var getNodeItemPath = this.getNodeItemPath;
-      container.onclick = function(e) {
-        var el = e.target;
-        while (el !== container) {
-          if (el.className === "value-tree-node__name") {
-            alert(getNodeItemPath(el.nodeItem));
-          }
-
-          el = el.parentElement;
-        }
-      };
-
       // should append rendered nodes to container
       container.appendChild(this.renderNode(tree, container.ownerDocument));
     },
 
-    // should return path to node item
-    getNodeItemPath(nodeItem) {
-      // should do nothing if no nodeItem with node data given
-      if (!nodeItem || !nodeItem.node) return "";
-
-      // should collect path by moving up node by node (excluding root)
-      var path = "";
-      while (nodeItem.hasOwnProperty("childIndex")) {
-        var index = String(nodeItem.childIndex);
-        var name = String(nodeItem.node.name);
-        path = index + ":" + name + (path.length ? "/" : "") + path;
-        nodeItem = nodeItem.parentNodeItem;
-      }
-
-      // should alert path when have some
-      return path;
-    },
-
     // should recursively render tree nodes
     renderNode: function(node, doc) {
+      var self = this;
+
       // should return undefined when no node object given
       if (!node || typeof node !== "object") return undefined;
 
@@ -72,6 +43,11 @@
 
       // name should hold the node item
       name.nodeItem = nodeItem;
+
+      // should show node path on name click
+      name.onclick = function(e) {
+        alert(self.getNodeItemPath(nodeItem));
+      };
 
       // should render value when presented
       if (node.hasOwnProperty("value")) {
@@ -137,6 +113,24 @@
       }
 
       return wrapper;
+    },
+
+    // should return path to node item
+    getNodeItemPath(nodeItem) {
+      // should do nothing if no nodeItem with node data given
+      if (!nodeItem || !nodeItem.node) return "";
+
+      // should collect path by moving up node by node (excluding root)
+      var path = "";
+      while (nodeItem.hasOwnProperty("childIndex")) {
+        var index = String(nodeItem.childIndex);
+        var name = String(nodeItem.node.name);
+        path = index + ":" + name + (path.length ? "/" : "") + path;
+        nodeItem = nodeItem.parentNodeItem;
+      }
+
+      // should alert path when have some
+      return path;
     },
 
     // should return tree created by merging every {path,value} pair given
