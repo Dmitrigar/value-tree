@@ -10,26 +10,26 @@
     // should render tree to container
     render: function(tree, container) {
       // should handle container click events
-      var clickNodeItem = this.clickNodeItem;
-      container.addEventListener("click", function(e) {
+      var getNodeItemPath = this.getNodeItemPath;
+      container.onclick = function(e) {
         var el = e.target;
         while (el !== container) {
-          if (el.className === "value-tree-node__item") {
-            clickNodeItem(el);
+          if (el.className === "value-tree-node__name") {
+            alert(getNodeItemPath(el.nodeItem));
           }
 
           el = el.parentElement;
         }
-      });
+      };
 
       // should append rendered nodes to container
       container.appendChild(this.renderNode(tree, container.ownerDocument));
     },
 
-    // should handle click by node item
-    clickNodeItem(nodeItem) {
+    // should return path to node item
+    getNodeItemPath(nodeItem) {
       // should do nothing if no nodeItem with node data given
-      if (!nodeItem || !nodeItem.node) return;
+      if (!nodeItem || !nodeItem.node) return "";
 
       // should collect path by moving up node by node (excluding root)
       var path = "";
@@ -41,7 +41,7 @@
       }
 
       // should alert path when have some
-      if (path.length) alert(path);
+      return path;
     },
 
     // should recursively render tree nodes
@@ -54,28 +54,54 @@
       wrapper.className = "value-tree-node";
 
       // should render item for the tree node itself
-      var item = doc.createElement("span");
-      item.className = "value-tree-node__item";
-      wrapper.appendChild(item);
+      var nodeItem = doc.createElement("span");
+      nodeItem.className = "value-tree-node__item";
+      wrapper.appendChild(nodeItem);
 
       // item should hold node data
-      item.node = node;
+      nodeItem.node = node;
 
       // wrapper should hold node item
-      wrapper.nodeItem = item;
+      wrapper.nodeItem = nodeItem;
 
       // should render name
       var name = doc.createElement("span");
       name.className = "value-tree-node__name";
       name.innerHTML = node.name;
-      item.appendChild(name);
+      nodeItem.appendChild(name);
+
+      // name should hold the node item
+      name.nodeItem = nodeItem;
 
       // should render value when presented
       if (node.hasOwnProperty("value")) {
-        var value = doc.createElement("span");
-        value.className = "value-tree-node__value";
-        value.innerHTML = String(node.value);
-        item.appendChild(value);
+        // should render readonly value
+        var readonly = doc.createElement("span");
+        readonly.className = "value-tree-node__value";
+        readonly.innerHTML = String(node.value);
+        nodeItem.appendChild(readonly);
+
+        // should render hidden editable value
+        var editable = doc.createElement("input");
+        editable.type = "text";
+        editable.hidden = true;
+        nodeItem.appendChild(editable);
+
+        // should handle ediging on click
+        var edit = function(e) {
+          editable.value = String(node.value);
+          readonly.hidden = true;
+          editable.hidden = false;
+        };
+        readonly.onclick = edit;
+
+        // should handle saving on blur or ENTER hit
+        var save = function(e) {
+          readonly.innerHTML = node.value = editable.value;
+          readonly.hidden = false;
+          editable.hidden = true;
+        };
+        editable.onblur = save;
       }
 
       //should render children when presented
@@ -94,7 +120,7 @@
 
             // child node item should hold child index and parent node item
             child.nodeItem.childIndex = i;
-            child.nodeItem.parentNodeItem = item;
+            child.nodeItem.parentNodeItem = nodeItem;
           }
         }
       }
@@ -143,9 +169,7 @@
             return undefined;
         }
 
-        var child = existingChild || {
-          name: step.name
-        };
+        var child = existingChild || { name: step.name };
         node.children[step.index] = child;
         node = child;
       }
