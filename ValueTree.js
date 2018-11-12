@@ -1,38 +1,91 @@
 (function() {
-  var ValueTree = {
-    // should recursively render tree nodes
-    render: function(treeNode, doc) {
-      // should return undefined when no treeNode object given
-      if (!treeNode || typeof treeNode !== "object") return undefined;
+  // should implement Array.isArray if no native implementation is available
+  if (typeof Array.isArray === "undefined") {
+    Array.isArray = function(obj) {
+      return Object.prototype.toString.call(obj) === "[object Array]";
+    };
+  }
 
-      // should create wrapper for every node
+  var ValueTree = {
+    // should render tree to container
+    render: function(tree, container) {
+      // should highlight node path on click
+      container.onclick = function(e) {
+        // should handle only when clicked inside node item
+        var regularClass = "value-tree-node__item";
+        var highlightClass = "value-tree-node__item--highlight";
+        var el = e.target;
+        while (
+          el &&
+          el.className !== regularClass &&
+          el.className !== highlightClass
+        ) {
+          el = el.parentElement;
+        }
+        if (!el) return;
+
+        // should unselect all node items
+        var highlights = container.getElementsByClassName(highlightClass);
+        while (highlights.length) highlights[0].className = regularClass;
+
+        // should select every parent node item
+        do {
+          el.className = highlightClass;
+        } while ((el = el.parentNodeItem));
+      };
+
+      // should append rendered nodes to container
+      container.appendChild(this.renderNode(tree, container.ownerDocument));
+    },
+
+    // should recursively render tree nodes
+    renderNode: function(node, doc) {
+      // should return undefined when no node object given
+      if (!node || typeof node !== "object") return undefined;
+
+      // should wrap the whole tree node
       var wrapper = doc.createElement("div");
       wrapper.className = "value-tree-node";
 
-      // should create name for every node
+      // should render item for the tree node itself
+      var item = doc.createElement("span");
+      item.className = "value-tree-node__item";
+      wrapper.appendChild(item);
+
+      // should hold tree node item
+      wrapper.nodeItem = item;
+
+      // should render name
       var name = doc.createElement("span");
       name.className = "value-tree-node__name";
-      name.innerHTML = treeNode.name;
-      wrapper.appendChild(name);
+      name.innerHTML = node.name;
+      item.appendChild(name);
 
-      // should create value when presented
-      if (treeNode.hasOwnProperty("value")) {
+      // should render value when presented
+      if (node.hasOwnProperty("value")) {
         var value = doc.createElement("span");
         value.className = "value-tree-node__value";
-        value.innerHTML = String(treeNode.value);
-        wrapper.appendChild(value);
+        value.innerHTML = String(node.value);
+        item.appendChild(value);
       }
 
-      // should recursively render children when presented
-      if (Array.isArray(treeNode.children)) {
+      //should render children when presented
+      if (Array.isArray(node.children)) {
         var children = doc.createElement("div");
         children.className = "value-tree-node__children";
         wrapper.appendChild(children);
-        for (var i = 0, n = treeNode.children.length; i < n; i++) {
-          var child = this.render(treeNode.children[i], doc);
 
-          // should skip undefined children
-          if (child) children.appendChild(child);
+        // should render children recursively
+        for (var i = 0, n = node.children.length; i < n; i++) {
+          var child = this.renderNode(node.children[i], doc);
+
+          // should skip when child is undefined
+          if (child) {
+            // should hold parent item
+            child.nodeItem.parentNodeItem = item;
+
+            children.appendChild(child);
+          }
         }
       }
 
@@ -44,7 +97,10 @@
       // should return undefined when no array argument presented
       if (!Array.isArray(pairs)) return undefined;
 
-      var root = { name: "root", children: [] };
+      var root = {
+        name: "root",
+        children: []
+      };
       for (var i = 0; i < pairs.length; i++) {
         // should return undefined when any pair can not be merged
         if (!this.mergePair(root, pairs[i])) return undefined;
@@ -77,7 +133,9 @@
             return undefined;
         }
 
-        var child = existingChild || { name: step.name };
+        var child = existingChild || {
+          name: step.name
+        };
         node.children[step.index] = child;
         node = child;
       }
@@ -138,10 +196,12 @@
     }
   };
 
+  // should export when using from module
   if (typeof module !== "undefined") {
     module.exports = ValueTree;
   }
 
+  // should add to window when using from browser
   if (typeof window !== "undefined") {
     window.ValueTree = ValueTree;
   }

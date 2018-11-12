@@ -69,11 +69,15 @@
       }
     ]);
     var container = document.getElementById("container");
-    container.appendChild(ValueTree.render(tree, document))
+    ValueTree.render(tree, container);
   </script>
   <style>
     #container {
       margin: 10px;
+    }
+
+    .value-tree-node__item--highlight {
+      background: yellow;
     }
 
     .value-tree-node__value {
