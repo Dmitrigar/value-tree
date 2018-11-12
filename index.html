@@ -11,18 +11,15 @@
   <h1>Value Tree</h1>
   <div id="help">
     <p>
-      <span>Click node</span>
-      <span class="value-tree-node__name">name</span>
-      <span>to check out path to the node</span>
+      Click node <span class="value-tree-node__name">name</span>
+      to show/hide <span class="value-tree-node__path">path</span> to the node.
     </p>
     <p>
-      <span>Click node</span>
-      <span class="value-tree-node__value">value</span>
-      <span>to edit.</span>
-      <span>Unfocus editable input or hit ENTER to save edits.</span>
+      Click node <span class="value-tree-node__value">value</span>
+      to edit. Unfocus editable input or hit ENTER to save edits.
     </p>
-   </div>
-   <div id="container">
+  </div>
+  <div id="container">
   </div>
   <script>
     var tree = ValueTree.parse([{
@@ -98,6 +95,12 @@
 
     .value-tree-node__value {
       background: #faa;
+      padding: 0 5px;
+      margin: 0 5px;
+    }
+
+    .value-tree-node__path {
+      background: #aaf;
       padding: 0 5px;
       margin: 0 5px;
     }
