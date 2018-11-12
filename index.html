@@ -9,7 +9,8 @@
 
 <body>
   <h1>Value Tree</h1>
-  <div id="container"></div>
+   <div id="container">
+  </div>
   <script>
     var tree = ValueTree.parse([{
         "path": "3:classes/0:A",
@@ -76,8 +77,16 @@
       margin: 10px;
     }
 
+    .value-tree-node__name {
+      background: #afa;
+      padding: 0 5px;
+      margin: 0 5px;
+    }
+
     .value-tree-node__value {
-      margin: 0 10px;
+      background: #faa;
+      padding: 0 5px;
+      margin: 0 5px;
     }
 
     .value-tree-node__children {
