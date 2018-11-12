@@ -122,7 +122,7 @@
     },
 
     // should return path to node item
-    getNodeItemPath(nodeItem) {
+    getNodeItemPath: function(nodeItem) {
       // should do nothing if no nodeItem with node data given
       if (!nodeItem || !nodeItem.node) return "";
 
